@@ -13,7 +13,7 @@ build:
   number: 0
   script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
   # numpy 1.26.4(latest version <2.0) not avalible from py<39
-  # pandas 1.5.3 not avaliable for py>311
+  # pandas 1.5.3(latest version <2.0) not avaliable for py>311
   skip: True  # [py<39 or py>311]
   skip: True  # [s390x]
 
@@ -33,9 +33,9 @@ requirements:
     - scikit-learn >=0.24
     # return klass(values, ndim=ndim, placement=placement, refs=refs)
     # TypeError: Argument 'placement' has incorrect type (expected pandas._libs.internals.BlockPlacement, got numpy.ndarray)
-    # Set last compatible versions for xgboost and pandas
-    - pandas >=1.1.4,<=1.5.3
-    - xgboost >=0.90,<=1.7.3
+    # Set last compatible versions for xgboost and pandas <2.0
+    - pandas >=1.1.4,<2.0
+    - xgboost >=0.90,<2.0
 
 # ModuleNotFoundError: No module named 'hcrystalball'
 {% set deselect_tests = " --deselect=test/test_model.py::test_prep" %}
