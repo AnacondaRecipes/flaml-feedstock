@@ -41,6 +41,8 @@ requirements:
 {% set deselect_tests = " --deselect=test/test_model.py::test_prep" %}
 # Pkg vowpalwabbit is not created for the win platform
 {% set deselect_tests = deselect_tests + " --deselect=test/test_autovw.py::TestAutoVW::test_vw_oml_problem_and_vanilla_vw" %}  # [win]
+{% set deselect_tests = deselect_tests + " --deselect=test/test_autovw.py::TestAutoVW::test_supervised_vw_tune_namespace" %}  # [win]
+{% set deselect_tests = deselect_tests + " --deselect=test/test_autovw.py::TestAutoVW::test_supervised_vw_tune_namespace_learningrate" %}  # [win]
 
 test:
   source_files:
