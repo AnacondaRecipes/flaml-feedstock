@@ -15,6 +15,7 @@ build:
   # numpy 1.26.4(latest version <2.0) not avalible from py<39
   # pandas 1.5.3 not avaliable for py>311
   skip: True  # [py<39 or py>311]
+  skip: True  # [s390x]
 
 requirements:
   host:
@@ -38,6 +39,8 @@ requirements:
 
 # ModuleNotFoundError: No module named 'hcrystalball'
 {% set deselect_tests = " --deselect=test/test_model.py::test_prep" %}
+# Pkg vowpalwabbit is not created for the win platform
+{% set deselect_tests = deselect_tests + " --deselect=test/test_autovw.py::TestAutoVW::test_vw_oml_problem_and_vanilla_vw" %}  # [win]
 
 test:
   source_files:
@@ -53,7 +56,8 @@ test:
     # In the snowflake channel avaliable only openml==0.12.2 (default is 0.10.2)
     - openml ==0.12.2
     - catboost
-    - vowpalwabbit
+    # Pkg is not created for the win platform
+    - vowpalwabbit  # [not win]
 
 about:
   home: https://github.com/microsoft/FLAML
