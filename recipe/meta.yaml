@@ -1,52 +1,66 @@
-{% set name = "FLAML" %}
-{% set version = "2.1.2" %}
+{% set name = "flaml" %}
+{% set version = "1.2.4" %}
 
 package:
   name: {{ name|lower }}
   version: {{ version }}
 
 source:
-  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
-  sha256: 33102862a21c63d004f78e1349ccd55753e3534bfcdcb6e65a08562c14d69e44
+  #url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/FLAML-{{ version }}.tar.gz
+  # make name upper case
+  url: https://github.com/microsoft/FLAML/archive/refs/tags/v1.2.4.tar.gz
+  #sha256: ba8b62df4f459e226f951e03c4238a699b3168f708e30c4e7c75eba261896fe2
+  sha256: e0a2c0cc7cec35580129a91e45ba7a1974d761c104c5267c5c91ce4df49e9b1e
+  patches:
+    - patches/0001-Don-t-specify-a-pre-release-in-the-numpy-dependency.patch
 
 build:
   number: 0
-  noarch: python
-  script: {{ PYTHON }} -m pip install . -vv
-
+  script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+  skip: True  # [py<36]
 
 requirements:
+  build: 
+    - patch  # [not win]
+    - m2-patch  # [win]
   host:
     - pip
-    - python >=3.6
+    - python
+    - wheel
+    - setuptools
   run:
-    - numpy >=1.17.0rc1
+    - python
+    # https://github.com/microsoft/FLAML/issues/1285 (removed .0rc1)
+    - numpy >=1.17,<1.20
     - lightgbm >=2.3.1
     - xgboost >=0.90
     - scipy >=1.4.1
     - pandas >=1.1.4
     - scikit-learn >=0.24
-    - python >=3.6
 
 test:
+  source_files:
+    - test
+  imports:
+    - flaml
+  commands:
+    #- pip check
+    - pytest -v test
   requires:
     - pip
     - pytest
     - pandas >=1.1.4
     - scikit-learn >=0.24
-  source_files:
-    # list all conda related test files here
-    # note: keep the conda related tests directly in the test folder, so that bundling to tar.gz includes them
-    # or just extend the test_conda_distribution.py file with more tests (and make sure to mark it as conda)
-    - test/test_conda_distribution.py
-  commands:
-    - pytest -m conda
 
 about:
   home: https://github.com/microsoft/FLAML
   summary: A fast and lightweight autoML system
   license: MIT
   license_file: LICENSE
+  license_family: MIT
+  dev_url: https://github.com/microsoft/FLAML
+  doc_url: https://microsoft.github.io/FLAML/
+  description: FLAML is a lightweight Python library that finds accurate machine learning models automatically, efficiently and economically.
 
 extra:
   recipe-maintainers:
