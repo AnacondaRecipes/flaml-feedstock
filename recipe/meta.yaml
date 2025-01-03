@@ -6,23 +6,17 @@ package:
   version: {{ version }}
 
 source:
-  #url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/FLAML-{{ version }}.tar.gz
-  # make name upper case
-  url: https://github.com/microsoft/FLAML/archive/refs/tags/v1.2.4.tar.gz
-  #sha256: ba8b62df4f459e226f951e03c4238a699b3168f708e30c4e7c75eba261896fe2
-  sha256: e0a2c0cc7cec35580129a91e45ba7a1974d761c104c5267c5c91ce4df49e9b1e
-  patches:
-    - patches/0001-Don-t-specify-a-pre-release-in-the-numpy-dependency.patch
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/FLAML-{{ version }}.tar.gz
+  sha256: ba8b62df4f459e226f951e03c4238a699b3168f708e30c4e7c75eba261896fe2
 
 build:
   number: 0
   script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
-  skip: True  # [py<36]
+  # numpy 1.26.4(latest version <2.0) not avalible from py<39
+  # pandas 1.5.3 not avaliable for py>311
+  skip: True  # [py<39 or py>311]
 
 requirements:
-  build: 
-    - patch  # [not win]
-    - m2-patch  # [win]
   host:
     - pip
     - python
@@ -30,13 +24,20 @@ requirements:
     - setuptools
   run:
     - python
-    # https://github.com/microsoft/FLAML/issues/1285 (removed .0rc1)
-    - numpy >=1.17,<1.20
+    # AttributeError: `np.Inf` was removed in the NumPy 2.0 release. Use `np.inf` instead.
+    # Set last compatible version for NumPy
+    - numpy >=1.17.0rc1,<=2.0
     - lightgbm >=2.3.1
-    - xgboost >=0.90
     - scipy >=1.4.1
-    - pandas >=1.1.4
     - scikit-learn >=0.24
+    # return klass(values, ndim=ndim, placement=placement, refs=refs)
+    # TypeError: Argument 'placement' has incorrect type (expected pandas._libs.internals.BlockPlacement, got numpy.ndarray)
+    # Set last compatible versions for xgboost and pandas
+    - pandas >=1.1.4,<=1.5.3
+    - xgboost >=0.90,<=1.7.3
+
+# ModuleNotFoundError: No module named 'hcrystalball'
+{% set deselect_tests = " --deselect=test/test_model.py::test_prep" %}
 
 test:
   source_files:
@@ -44,13 +45,15 @@ test:
   imports:
     - flaml
   commands:
-    #- pip check
-    - pytest -v test
+    - pip check
+    - pytest -v {{ deselect_tests }} test
   requires:
     - pip
     - pytest
-    - pandas >=1.1.4
-    - scikit-learn >=0.24
+    # In the snowflake channel avaliable only openml==0.12.2 (default is 0.10.2)
+    - openml ==0.12.2
+    - catboost
+    - vowpalwabbit
 
 about:
   home: https://github.com/microsoft/FLAML
