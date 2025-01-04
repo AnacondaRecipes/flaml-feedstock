@@ -32,7 +32,7 @@ requirements:
     - python
     # AttributeError: `np.Inf` was removed in the NumPy 2.0 release. Use `np.inf` instead.
     # Set last compatible version for NumPy
-    - numpy >=1.17.0rc1,<2.0
+    - numpy >=1.17.0,<2.0
     - lightgbm >=2.3.1
     - scipy >=1.4.1
     - scikit-learn >=0.24
