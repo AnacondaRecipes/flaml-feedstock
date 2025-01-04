@@ -59,7 +59,8 @@ requirements:
     # Nlp
     - transformers ==4.26
     # Notebook
-    - openml ==0.10.2
+    # Duplicated in the test section, comment this line to avoid compilation error.
+    #- openml ==0.10.2,<0.13
     # Openai
     - openai ==0.27.4
     # Ray
@@ -77,7 +78,8 @@ requirements:
     - statsmodels >=0.12.2
     - hcrystalball ==0.1.10
     # Vw
-    - vowpalwabbit >=8.10.0,<9.0.0
+    # Duplicated in the test section for all platforms except Windows.
+    - vowpalwabbit >=8.10.0,<9.0.0  # [win]
 
 # ModuleNotFoundError: No module named 'hcrystalball'
 {% set deselect_tests = " --deselect=test/test_model.py::test_prep" %}
