@@ -52,7 +52,7 @@ requirements:
     - holidays <0.14
     - prophet >=1.0.1
     - statsmodels >=0.12.2
-    - hcrystalball ==0.1.10
+    - hcrystalball >=0.1.10,<0.2
     - pytorch-forecasting >=0.9.0
     # Hf
     - transformers >=4.26,<5
