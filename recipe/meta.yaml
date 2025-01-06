@@ -43,7 +43,7 @@ requirements:
     - xgboost >=0.90,<2.0
   run_constrained:
     # Autogen
-    - openai >=0.27.4,<0.3
+    - openai >=0.27.4,<0.30
     # Blendsearch
     - optuna >=2.8.0,<3
     # Catboost
@@ -62,7 +62,7 @@ requirements:
     # Duplicated in the test section, comment this line to avoid compilation error.
     #- openml ==0.10.2,<0.13
     # Openai
-    - openai >=0.27.4,<0.3
+    - openai >=0.27.4,<0.30
     # Ray
     - ray >=1.13,<2.dev0
     # Spark
