@@ -104,7 +104,7 @@ test:
   requires:
     - pip
     - pytest
-    - openml
+    - openml >=0.10.2,<=0.12.2
     - catboost
     # Pkg is not created for the win platform
     - vowpalwabbit  # [not win]
