@@ -1,52 +1,123 @@
-{% set name = "FLAML" %}
-{% set version = "2.1.2" %}
+{% set name = "flaml" %}
+{% set version = "1.2.4" %}
 
 package:
   name: {{ name|lower }}
   version: {{ version }}
 
 source:
-  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
-  sha256: 33102862a21c63d004f78e1349ccd55753e3534bfcdcb6e65a08562c14d69e44
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/FLAML-{{ version }}.tar.gz
+  sha256: ba8b62df4f459e226f951e03c4238a699b3168f708e30c4e7c75eba261896fe2
+  patches:
+    - patches/0001-Don-t-specify-a-pre-release-in-the-numpy-dependency.patch
 
 build:
   number: 0
-  noarch: python
-  script: {{ PYTHON }} -m pip install . -vv
-
+  script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+  # numpy 1.26.4(latest version <2.0) not avalible from py<39
+  # pandas 1.5.3(latest version <2.0) not avaliable for py>311
+  skip: True  # [py<39 or py>311]
+  skip: True  # [s390x]
 
 requirements:
+  build:
+    - patch  # [not win]
+    - m2-patch  # [win]
   host:
     - pip
-    - python >=3.6
+    - python
+    - wheel
+    - setuptools
   run:
-    - numpy >=1.17.0rc1
+    - python
+    # AttributeError: `np.Inf` was removed in the NumPy 2.0 release. Use `np.inf` instead.
+    # Set last compatible version for NumPy
+    - numpy >=1.17.0,<2.0
     - lightgbm >=2.3.1
-    - xgboost >=0.90
     - scipy >=1.4.1
-    - pandas >=1.1.4
     - scikit-learn >=0.24
-    - python >=3.6
+    # return klass(values, ndim=ndim, placement=placement, refs=refs)
+    # TypeError: Argument 'placement' has incorrect type (expected pandas._libs.internals.BlockPlacement, got numpy.ndarray)
+    # Set last compatible versions for xgboost and pandas <2.0
+    - pandas >=1.1.4,<2.0
+    - xgboost >=0.90,<2.0
+  run_constrained:
+    # Autogen
+    - openai >=0.27.4,<0.30
+    # Blendsearch
+    - optuna >=2.8.0,<2.9.0
+    # Catboost
+    - catboost >=0.26
+    # Forecast
+    - holidays <0.14
+    - prophet >=1.0.1
+    - statsmodels >=0.12.2
+    - hcrystalball >=0.1.10,<0.2
+    - pytorch-forecasting >=0.9.0
+    # Hf
+    # transformers[torch]==4.26
+    - transformers >=4.26,<5
+    - torch >=1.7,!=1.12.0
+    # Nlp
+    # transformers[torch]==4.26
+    # - transformers >=4.26,<5
+    # - torch >=1.7,!=1.12.0
+    # Notebook
+    # Duplicated in the test section, comment this line to avoid compilation error.
+    # - openml ==0.10.2,<0.13
+    # Openai
+    # - openai >=0.27.4,<0.30
+    # Ray
+    - ray >=1.13,<2.dev0
+    # Spark
+    - pyspark >=3.2.0
+    - joblibspark >=0.5.0
+    # Synapse
+    # - joblibspark >=0.5.0
+    # - optuna >=2.8.0,<2.9.0
+    # - pyspark >=3.2.0
+    # Ts_forecast
+    # - holidays <0.14
+    # - prophet >=1.0.1
+    # - statsmodels >=0.12.2
+    # - hcrystalball >=0.1.10,<0.2
+    # Vw
+    # Duplicated in the test section for all platforms except Windows.
+    - vowpalwabbit >=8.10.0,<9.0.0  # [win]
+
+# ModuleNotFoundError: No module named 'hcrystalball'
+{% set deselect_tests = " --deselect=test/test_model.py::test_prep" %}
+# Pkg vowpalwabbit is not created for the win platform
+{% set deselect_tests = deselect_tests + " --deselect=test/test_autovw.py::TestAutoVW::test_vw_oml_problem_and_vanilla_vw" %}  # [win]
+{% set deselect_tests = deselect_tests + " --deselect=test/test_autovw.py::TestAutoVW::test_supervised_vw_tune_namespace" %}  # [win]
+{% set deselect_tests = deselect_tests + " --deselect=test/test_autovw.py::TestAutoVW::test_supervised_vw_tune_namespace_learningrate" %}  # [win]
+{% set deselect_tests = deselect_tests + " --deselect=test/test_conda_distribution.py::test_package_minimum" %}  # [win]
 
 test:
+  source_files:
+    - test
+  imports:
+    - flaml
+  commands:
+    - pip check
+    - pytest -v {{ deselect_tests }} test
   requires:
     - pip
     - pytest
-    - pandas >=1.1.4
-    - scikit-learn >=0.24
-  source_files:
-    # list all conda related test files here
-    # note: keep the conda related tests directly in the test folder, so that bundling to tar.gz includes them
-    # or just extend the test_conda_distribution.py file with more tests (and make sure to mark it as conda)
-    - test/test_conda_distribution.py
-  commands:
-    - pytest -m conda
+    - openml >=0.10.2,<=0.12.2
+    - catboost
+    # Pkg is not created for the win platform
+    - vowpalwabbit  # [not win]
 
 about:
   home: https://github.com/microsoft/FLAML
   summary: A fast and lightweight autoML system
   license: MIT
   license_file: LICENSE
+  license_family: MIT
+  dev_url: https://github.com/microsoft/FLAML
+  doc_url: https://microsoft.github.io/FLAML/
+  description: FLAML is a lightweight Python library that finds accurate machine learning models automatically, efficiently and economically.
 
 extra:
   recipe-maintainers:
