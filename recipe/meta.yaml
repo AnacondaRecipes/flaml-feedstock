@@ -57,7 +57,7 @@ requirements:
     # Hf
     # transformers[torch]==4.26
     - transformers >=4.26,<5
-    # - torch >=1.7,!=1.12.0
+    - torch >=1.7,!=1.12.0
     # Nlp
     # transformers[torch]==4.26
     # - transformers >=4.26,<5
